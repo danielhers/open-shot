@@ -8,11 +8,9 @@ from django.utils.translation import ugettext as _
 from user.models import Profile
 
 unicode_username = forms.RegexField(label=_("Username"), max_length=30,
-        regex=re.compile(r'^[\w.@+-]{4,}$', re.U),
-        help_text = _("Required. 30 characters or fewer. Alphanumeric \
-characters only (letters, digits and underscores)."),
-        error_message = _("This value must contain only letters, \
-numbers and underscores.")) 
+        regex=re.compile(r'^(?u)[ \w.@+-]{4,}$', re.U),
+        help_text = _("Required. 4-30 characters (only letters, numbers spaces and @/./+/-/_ characters)."),
+        error_message = _("Required. 4-30 characters (only letters, numbers spaces and @/./+/-/_ characters)."))
 
 class ProfileAdmin(admin.StackedInline):
     model = Profile
