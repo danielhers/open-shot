@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "user/user_base.html" %}
 {% load i18n avatar_tags %}{% load static from staticfiles %}
 {% block extratitle %}{% trans "User Profile" %}{% endblock %}
 
@@ -12,26 +12,14 @@
     <div class="card card-main">
       <div class="spacer">
         <h1>{% trans "User Profile" %}</h1>
-        {% if not form.valid_email %}
-          {% if not form.has_email %}
-            <div class="alert alert-error">
-              {% trans "You do not have permissions to edit anything. In order to be able to edit, you must first provide a valid email address." %}
-            </div>
-          {% else %}
-            <div class="alert alert-block">
-              {% trans "You do not have permissions to edit anything. In order to be able to edit, you must provide a valid email address, and validate it" %}
-              <form action="{% url 'send-validation-email' %}" method="post">{% csrf_token %}
-                <input type="submit" name="send validation email" value="{% trans 'send validation email' %}">
-              </form>
-            </div>
-          {% endif %}
-        {% else %}
-          <div class="alert alert-info">{% trans 'Your email has been validated, so you can edit stuff!' %}</div>
-        {% endif %}
         <form action="." method="post">{% csrf_token %}
           {{ form.as_p }}
           <input class="btn btn-primary" type="submit" name="save" value="{% trans 'save' %}" />
         </form>
+        <a href="{% url 'password_change' %}">{% trans 'Change password' %}</a>
+        {% if candidate_list %}
+          <br><a href="{% url 'candidatelist-edit' candidate_list.id %}">{% trans 'Edit list details' %} - {{candidate_list.name}}</a>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -39,23 +27,29 @@
     <aside class="dead-center sidebar">
       <ul>
       <h2>{% trans "Avatar" %}</h2>
-        <li>{% avatar request.user 75 %}</li>
-        <li><a class="btn" href="{% url 'avatar_change' %}">{% trans "Change your avatar" %}</a></li>
+        <li>
+          <img src="{% avatar_url request.user 75 %}" class="avatar img-circle">
+        </li>
+        <li><a class="btn" href="{% url 'avatar_add' %}">{% trans "Change your avatar" %}</a></li>
       </ul>
     </aside>
 
     <aside class="sidebar">
       <h2>{% trans "Following" %}</h2>
       <ul>
-      {% for user in profile.following %}
+      {% with hide_controls=True %}
+        {% for question in profile.following %}
         <li>
-          <a href="#" class="btn btn-danger btn-mini unfollow" id="unfollow-user-{{u.id}}">
+        <!--TODO: add the ability to unfollow a question
+        <a href="#" class="btn btn-danger btn-mini unfollow" id="unfollow-{{question.id}}">
           <i class="icon-remove-sign icon-white"></i></a>
-            <a id="following-user-{{u.id}}" href="{{u.get_absolute_url}}">{{u}}</a>
+        -->
+        {% include "qa/_question.html" %}
           </li>
-      {% empty %}
+        {% empty %}
         <li>{% trans "none" %}</li>
-      {% endfor %}
+        {% endfor %}
+      {% endwith %}
       </ul>
     </aside>
   </div>

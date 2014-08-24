@@ -5,6 +5,7 @@ from .base import *
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
+SINGLE_PROCESS = True
 
 DATABASES = {
     'default': {
@@ -35,3 +36,8 @@ else:
 DEBUG_TOOLBAR_CONFIG = {
         'INTERCEPT_REDIRECTS': False,
 }
+
+try:
+    from .local import *
+except:
+    pass

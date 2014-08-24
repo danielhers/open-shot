@@ -48,8 +48,9 @@ STATICFILES_ROOT = PROJECT_DIR.child('static')
 LOCALE_PATHS = (unicode(PROJECT_DIR.child('locale')), )
 
 STATICFILES_DIRS = [
-    (subdir, str(STATICFILES_ROOT.child(subdir))) for subdir in
-    ['css', 'img', 'js']]
+        (subdir, str(STATICFILES_ROOT.child(subdir))) for subdir in
+    ('css', 'img', 'js', )]
+
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
@@ -71,8 +72,8 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'bootstrap_pagination.middleware.PaginationMiddleware',
-    'oshot.middleware.LocalityMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'oshot.middleware.DefaultEntity',
 )
 
 ROOT_URLCONF = 'oshot.urls'
@@ -129,6 +130,7 @@ INSTALLED_APPS = (
     'avatar',
     'actstream',
     'debug_toolbar',
+    'djsupervisor',
     # local apps
     'qa',
     'user',
@@ -180,7 +182,7 @@ LOGGING = {
 
 ACCOUNT_ACTIVATION_DAYS = 7 # One-week activation window; you may, of course, use a different value.
 LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = '/login/'
+LOGIN_URL = '/u/login/'
 
 DEFAULT_FROM_EMAIL = 'localshot@hasadna.org.il'
 
@@ -221,10 +223,21 @@ HAYSTACK_CONNECTIONS = {
         'PATH': os.path.join(PROJECT_DIR, 'whoosh_index'),
     },
 }
-djcelery.setup_loader()
-HAYSTACK_SIGNAL_PROCESSOR = 'celery_haystack.signals.CelerySignalProcessor'
-EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
 AUTO_GENERATE_AVATAR_SIZES = (75, 48)
 ABSOLUTE_URL_OVERRIDES = {
     'auth.user': lambda u: reverse("public-profile", args = (u.username,)),
 }
+AVATAR_MAX_AVATARS_PER_USER = 1
+AVATAR_GRAVATAR_BACKUP = False
+AVATAR_DEFAULT_URL = "http://ok-qa-media.s3.amazonaws.com/img/question_comix.png"
+
+QNA_DEFAULT_ENTITY_ID = 277
+
+CACHES = {
+        'default': {
+            'BACKEND':
+            'django.core.cache.backends.dummy.DummyCache',
+            }
+        }
+
+LONG_CACHE_TIME = 18000  # 5 hours

@@ -1,5 +1,5 @@
 {% extends "qa/qa_base.html" %}
-{% load i18n %}
+{% load i18n avatar_tags %}
 {% block pageTitle %}{{ question }}{% endblock %}
 {% block extrahead %}
     {% get_current_language as LANGUAGE_CODE %}
@@ -25,75 +25,8 @@
         <div class="row">
             <div class="span9">
                 {% include "qa/_question.html" %}
-            </div>
-            <div class="span3 sidebar">
-              {% if user == question.author %}
-                {% if not answers %}
-                    <a class="edit-question btn btn-action" href="{{ question.get_absolute_url }}edit">
-                      {% trans "Edit Question" %}
-                    </a>
-                {% endif %}
-              {% else %}
-                  <a class="btn btn-primary" id="upvote-question" href="#">
-                      {% trans "I Want an Answer" %}
-                  </a>
-              {% endif %}
-                {% if can_answer %}
-                    <a class="btn btn-success btn-large" style="margin-top: 10px;" href="#add_answer_modal"
-                       data-toggle="modal">
-                      {% if my_answer_form.content.value %}
-                        {% trans "Change Your Answer" %}
-                      {% else %}
-                        {% trans "Answer the Question" %}
-                      {% endif %}
-                    </a>
-                {% endif %}
-                {% if user.profile.is_editor %}
-                    <a class="btn btn-danger" href="#remove-question" data-toggle="modal">&#9872; </a>
-                    <div id="remove-question" class="modal hide fade">
-                        <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                            <h3>{% trans "Confirm Question Removal" %}</h3>
-                        </div>
-                        <div class="modal-body">
-                            <blockquote>{{ question }}</blockquote>
-                            <p>{% trans "Are you sure you want to remove the question?" %}</p>
-                        </div>
-                        <div class="modal-footer">
-                            <a class="flag-question btn btn-primary" data-dismiss="modal"
-                               question-id="{{ question.id }}" href="#">
-                                {% trans "Delete" %}
-                            </a>
-                        </div>
-                    </div>
-                {% else %}
-                    {% if user != question.author or not question.answers.all %}
-                    <a class="flag-question btn btn-danger {% if not can_upvote %}disabled{% endif %}
-                      {% if user == question.author %}
-                      icon-remove" title="{% trans "Delete" %}" 
-                      {% else %}
-                      icon-flag" title="{% trans "Flag question" %}"
-                      {% endif %}
-		      question-id="{{ question.id }}" href="#">
-                    </a>
-                    {% endif %}
-                {% endif %}
-            </div>
-
-        </div>
-        <div class="row questions-wrapper">
-            <div class="span9 answers">
-                {% if answers %}
-                    <h5>
-                        {% trans 'Answers' %}
-                        <div class="pull-right">
-                            <a href="{% url "atom_question_answers" question.id %}" title="{% trans 'feed' %}"
-                               rel="tooltip">
-                                <img src="{{ STATIC_URL }}img/rss.png" width="25"/>
-                            </a>
-                        </div>
-                    </h5>
-                {% endif %}
+	    <div class="row">
+            <div class="offset1 answers">
 
                 {% for answer in answers %}
                     {% include "qa/_answer.html" %}
@@ -106,6 +39,20 @@
                     </h5>
                 {% endfor %}
             </div>
+            </div>
+            </div>
+            <div class="supporters span3">
+              {% for supporter in supporters %}
+              <div class="supporter avatar-container">
+                <a href="{{ supporter.get_absolute_url }}" rel="tooltip"
+                   title="{{ supporter.get_full_name }}">
+                  {% avatar supporter %}
+                </a>
+              </div>
+              {% endfor %}
+            </div>
+        </div>
+        <div class="row questions-wrapper">
             <div class="span3">
 
             </div>
@@ -113,12 +60,11 @@
     </div>
     {% if my_answer_form %}
         <div class="modal fade" id="add_answer_modal">
+            <div class="modal-header">
+              <a class="close" data-dismiss="modal">&times;</a>
+              <h3>{{ question.subject }}</h3>
+            </div>
             <form class="form" method="post" action="{% url "post_answer" question.id %}">
-                <div class="modal-header">
-                    <a class="close" data-dismiss="modal">&times;</a>
-
-                    <h3>{{ question.subject }}</h3>
-                </div>
                 <div class="modal-body">
                     {% csrf_token %}
                     {{ my_answer_form.as_p }}
@@ -130,79 +76,48 @@
             </form>
         </div>
     {% endif %}
+    <p>
+      {% if answers %}
+        <a href="{% url "atom_question_answers" question.id %}" title="{% trans 'feed' %}"
+           rel="tooltip">
+            <img src="{{ STATIC_URL }}img/rss.png" width="25"/>
+        </a>
+      {% endif %}
+      &nbsp;
+      <a href="{% url "local_home" question.entity.id %}">
+        {% trans 'Back to' %}{{question.entity.name}}
+      </a>
+    </p>
 {% endblock %}
 {% if my_answer_id %}
     {% block extrascript %}
+
+        {% if not question.is_deleted %}
+          {% include "qa/_question_controls.js" %}
+        {% endif %}
         <script>
-            function display_message(message, level) {
-                $("#messages").html('<div class="alert ' + level + '">' +
-                        '<button type="button" class="close" data-dismiss="alert">×</button>' +
-                        message +
-                        '</div>');
-            }
             $(document).ready(function () {
-                $("#upvote-question").ajaxError(function (evt, jqXHR, setting, err) {
-                    $("#messages").html('<div class="alert" class="error">' +
-                            '<button type="button" class="close" data-dismiss="alert">×</button>' +
-                            jqXHR.responseText + '</div>');
-                });
-
-                $("#upvote-question").click(function () {
-                    {% if not can_upvote %}
-                        $("#messages").html('<div class="alert" class="info">' +
-                                '<button type="button" class="close" data-dismiss="alert">×</button>' +
-                                "{% trans 'Sorry but only connected users can upvote questions' %}" +
-                                '</div>');
-                    {% else %}
-                        $.post("{% url "upvote_question" question.id %}",
-                                {csrfmiddlewaretoken: "{{ csrf_token }}"},
-                                function (data, status, jqXHR) {
-                                    $("#votes-count-{{question.id}}").html(jqXHR.responseText);
-                                });
-                    {% endif %}
-                    return false;
-                })
-                $(".flag-question").click(function (e) {
-                    var url = "{% url "flag_question" question.id %}";
-                    {% if user == question.author %}
-                    if (!confirm("{% trans 'Are you sure you want to delete the question?' %}")) {
-                      return;
-                    }
-                    {% endif %}
-                    $.ajax({url: url,
-                        type: "POST",
-                        dataType: "json",
-                        data: {csrfmiddlewaretoken: "{{ csrf_token }}"}}).always(
-                            function (data, textStatus, jqXHR) {
-                                if ('message' in data)
-                                    display_message(data.message, "info");
-                                else if ('redirect' in data)
-                                    window.location.replace(data.redirect);
-                                else
-                                    alert("strange data receieved from flagging a message: " + data);
-                            })
-                })
-
-                $("#answer-{{ my_answer_id}}").hover(function () {
-                    $("#edit-answer-{{my_answer_id}}").show();
-                }, function () {
-                    $("#edit-answer-{{my_answer_id}}").hide();
-                });
-
-                {% if max_length_a_content %}
-                    var $answerContent = $("#id_content"),
-                            $charsCounter = $("#charsCounter"),
-                            $charsLeft = $("#charsLeft");
-
-                    $charsCounter.hide();
-                    $answerContent.on("keyup", function () {
-                        var length = this.value.length;
-
-                        if (length) $charsCounter.show();
-                        else $charsCounter.hide();
-
-                        $charsLeft.text({{ max_length_a_content }} -length);
+                {% if question.is_deleted %}
+                    var buttons = $(".btn");
+                    buttons.attr('disabled', true);
+                    buttons.removeAttr('data-toggle');
+                    buttons.click(function (e) {
+                        e.preventDefault();
                     });
+                {% elif max_length_a_content %}
+                      var $answerContent = $("#id_content"),
+                              $charsCounter = $("#charsCounter"),
+                              $charsLeft = $("#charsLeft");
+
+                      $charsCounter.hide();
+                      $answerContent.on("keyup", function () {
+                          var length = this.value.length;
+
+                          if (length) $charsCounter.show();
+                          else $charsCounter.hide();
+
+                          $charsLeft.text({{ max_length_a_content }} - length);
+                      });
                 {% endif %}
             });
         </script>

@@ -1,16 +1,30 @@
+@import url(http://fonts.googleapis.com/earlyaccess/alefhebrew.css);
 body {
-	background: whitesmoke;
-  overflow-x: hidden;
+	background: white;
+  overflow-x: scroll;
+  overflow: auto;
+  font-family: "Alef Hebrew",
+               "Helvetica Neue",
+               Helvetica,
+               Arial,
+               sans-serif;
 }
+a {color: #65427c; }
+a:hover {color: #8294de; }
 .wrapper {
     background: #fff;
 	margin: 0;
 	width: 100%;
 }
+#messages{
+    position: fixed;
+    z-index: 100;
+}
 /* Main Container */
-div[role="main"] {
-    padding-bottom: 70px;
-    padding-top: 8em;
+@media (min-width: 980px) {
+  .wrapper {
+    margin-top: 80px !important;
+  }
 }
 /* Footer */
 .footer {
@@ -38,19 +52,21 @@ h3 {
 	text-align: left;
 }
 .narrow {
-font-size: 11px;
+font-size: 12px;
 }
 .question-summary {
 overflow: hidden;
 border-bottom: 1px solid #F1F1F1;
 padding: 11px 0px 12px 0;
 }
-.cp {
+.candidate-avatar {
 cursor: pointer;
-float: left;
-height: 50px;
+width: 80px;
 background-position: 0 0;
 margin-right: 5px;
+text-align: center;
+display: inline-block;
+vertical-align: top;
 }
 .narrow .votes {
 padding: 6px 5px;
@@ -76,18 +92,25 @@ width: 48px;
 height: 38px;
 }
 
+.supporter {
+height: 73px;
+padding-top: 15px;
+display: inline-block;
+vertical-align: top;
+}
 .mini-counts {
 padding: 0 0 2px 0;
 line-height: 24px;
 font-size: 18px;
 font-family: Arial,Helvetica,sans-serif;
 }
-.narrow .summary { width: 550px; }
-.summary { float: right; width: 630px; }
 .summary h3 {
 margin-bottom: 7px;
-font-size: 15px;
+font-size: 20px;
 line-height: 16px;
+}
+.preview {
+font-size: 16px;
 }
 .tags {
 line-height: 18px;
@@ -98,7 +121,7 @@ color: #6A8491!important;
 }
 .post-tag {
 color: #6A8491!important;
-font-size: 11px;
+font-size: 12px;
 display: inline-block;
 background-color: #E3F5FF;
 text-decoration: none;
@@ -148,9 +171,6 @@ line-height: 18px!important;
 .module p { font-size: 120%; line-height: 1.3; margin-bottom: 0.5em; }
 
 /* Candidates */
-.narrow {
-font-size: 11px;
-}
 .candidate-summary {
 overflow: hidden;
 border-bottom: 1px solid #F1F1F1;
@@ -205,9 +225,12 @@ line-height: 18px!important;
 	padding: 0;
 }
 #nav-content > li > a { padding:5px 15px; }
-
-/* Login */
-form.navbar-search { margin :0; }
+.search-query{
+    background: white url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAMAAABhq6zVAAAAIVBMVEW/v7+/v78AAAC/v7+/v7+/v7+/v7+/v7+/v7+/v7+/v79QUkolAAAAC3RSTlOLYAAJeoMjRhpOcbsbtd4AAABJSURBVHjaVc1JDsAgDATB9uAF8v8Hx0QcSN9KssZI5eClDj18PRsFlmlQDcfUGd6A3EgYP1xncQ+sa5qYOk9jRQt1Y0izhU5bL2o2AW3ZQKeJAAAAAElFTkSuQmCC) 10px 8px no-repeat;
+}
+/* toolbar */
+form.navbar-search { margin-top:7px; float: none;}
+.link-enter {font-size:120%}
 .nav-self {float:left!important; margin-top:10x;}
 .nav-self li {padding-top: 14px;}
 
@@ -238,18 +261,11 @@ font-size: 12px;
 	padding-bottom:5px;
 	border-bottom: 1px solid #f1f1f1;
 }
-a.answer-user.owner {
-padding: 2px 5px 2px 5px;
-}
-a.answer-user {
-white-space: nowrap;
-padding: 0;
-}
 .owner {
-background-color: #DEEDFF;
-background-color: rgba(222, 237, 255, 0.4);
-background-color: #E0EAF1;
+
 }
+.answer-user { white-space: nowrap; padding: 0; font-weight:bold; }
+.owner { background-color: #E5BE7B; padding: 2px 5px 2px 5px;}
 .answer-date, .answer-date > a {
 border-bottom: none;
 color: #999;
@@ -268,9 +284,6 @@ textarea {
 .helptext {
 color: #595959;
 }
-a.edit {
-display: none;
-}
 a.edit:hover {
 text-decoration: none;
 }
@@ -283,9 +296,18 @@ h1, h2, h3, h4, h5, h6 {
 .post-question #charsCounter { position:absolute; left: 10px; bottom: 0; }
 .post-question .asteriskField { display: none; }
 .social-auth > li { display:inline;}
-.page-header { border:none; }
+.page-header { border:none; margin:0;}
 .editor-options { float:left;}
 .sidebar .btn {margin-top:1em;}
 .sidebar ul {list-style: none; }
 .nav-self a { padding-top: 0 !important; }
 .dead-center { text-align: center; vertical-align: middle; margin: 0 auto; }
+.pageHeader { text-align:center; padding-bottom: 1em;}
+.well { font-size:120%; }
+.candidate_list { text-align: right; }
+.candidate_list_detail {margin: 2px 10px; float: right; height: 40px; line-height: 40px; }
+.candidate_list_detail.ballot { color:black; margin: 0 auto; width: 40px; line-height: 40px; text-align: center;}
+.candidate_list_detail.answers_count { float: left; }
+.candidate_list a {color:black;}
+.candidate_list a:hover {color:black;text-decoration: none;}
+.links a {text-decoration: none;}
